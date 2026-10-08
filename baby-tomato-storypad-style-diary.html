@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7e8ee">
+<title>Baby Tomato Diary</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Handlee&display=swap');
+
+:root{
+  --ink:#503c45;
+  --muted:#a0848e;
+  --paper:#fffdf8;
+  --pink:#f4d8e3;
+  --rose:#d991a8;
+  --deep:#78455f;
+  --line:#ead8df;
+  --fs:23px;
+  --lh:39px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  font-family:Handlee,"Comic Sans MS",cursive;
+  color:var(--ink);
+  background:linear-gradient(135deg,#f8e9ee,#eaf3f5 55%,#fff3df);
+  min-height:100dvh;
+}
+button,input{font:inherit;color:inherit}
+button{border:0;cursor:pointer}
+button:active{transform:scale(.96)}
+
+.app{
+  width:100%;height:100dvh;
+  display:flex;flex-direction:column;
+}
+
+/* TOP BAR */
+.top{
+  flex:none;
+  width:min(960px,calc(100% - 20px));
+  margin:10px auto 0;
+  min-height:58px;
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;
+  border-radius:22px;
+  background:#ffffffc9;
+  backdrop-filter:blur(12px);
+  box-shadow:0 5px 22px #62425016;
+  z-index:5;
+}
+.top h1{
+  flex:1;text-align:center;
+  margin:0;color:var(--deep);
+  font-size:25px;font-weight:400;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.icon{
+  background:transparent;
+  border-radius:15px;
+  font-size:24px;
+  min-width:44px;height:44px;
+}
+.icon:hover{background:#f7dce688}
+
+/* BOOK AREA */
+main{
+  flex:1;min-height:0;
+  overflow:auto;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:12px 12px 5px;
+  -webkit-overflow-scrolling:touch;
+}
+.stage{
+  position:relative;
+  width:min(820px,96vw);
+  min-height:calc(100dvh - 150px);
+  height:max(650px,calc(100dvh - 150px));
+  perspective:2400px;
+  margin:auto;
+}
+.page{
+  position:absolute;inset:0;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 12% 10%,#ffffff 0 1px,transparent 1.5px),
+    var(--paper);
+  border-radius:7px 22px 22px 7px;
+  padding:30px 48px 18px 76px;
+  transform-origin:left center;
+  backface-visibility:hidden;
+  box-shadow:
+    inset 15px 0 17px -14px #60404b33,
+    3px 3px 0 #f1e6df,
+    6px 6px 0 #e7dbd3,
+    9px 9px 0 #f1e6df,
+    0 18px 34px #4b303d30;
+  transition:transform .72s cubic-bezier(.65,.045,.355,1);
+}
+.page:before{
+  content:"";
+  position:absolute;left:43px;top:0;bottom:0;
+  width:1.5px;background:#e4b7c455;
+}
+.page.turn-out{transform:rotateY(-110deg)}
+.page.turn-in{transform:rotateY(-110deg)}
+
+.cover{
+  padding:25px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;color:white;
+  background:linear-gradient(145deg,var(--cover),#f5cbd7)!important;
+}
+.cover:before{display:none}
+.cover .emoji{font-size:105px}
+.cover h2{
+  font-size:clamp(35px,7vw,60px);
+  font-weight:400;
+  color:var(--deep);
+  background:#ffffffe6;
+  padding:7px 18px;
+  border-radius:15px;
+  margin:10px 0;
+  max-width:90%;
+  overflow-wrap:anywhere;
+}
+.cover p{font-size:18px;margin:5px}
+
+.date{
+  display:inline-flex;
+  align-items:flex-start;
+  gap:8px;
+  color:var(--deep);
+  position:relative;
+  cursor:pointer;
+}
+.day{font-size:48px;line-height:.9}
+.dateWords{
+  display:flex;flex-direction:column;
+  padding-top:3px;
+  font-size:17px;line-height:1.15;
+}
+.dateWords small{font-size:12px;color:var(--muted)}
+.date input{
+  position:absolute;inset:0;
+  opacity:0;width:100%;height:100%;
+}
+
+.title{
+  width:100%;
+  margin-top:14px;
+  padding:6px 1px 10px;
+  border:0;border-bottom:1.5px dashed var(--line);
+  background:transparent;
+  outline:none;
+  color:var(--deep);
+  font-size:calc(var(--fs) + 7px);
+}
+.title::placeholder{color:#c1adb5}
+
+.writing{
+  flex:1;min-height:0;
+  margin-top:7px;
+  outline:none;
+  overflow:auto;
+  overflow-wrap:anywhere;
+  font-size:var(--fs);
+  line-height:var(--lh);
+  padding:0 2px 12px;
+  background-image:repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--lh) - 1px),
+    var(--line) calc(var(--lh) - 1px) var(--lh)
+  );
+  background-attachment:local;
+}
+.writing:empty:before{
+  content:"Start writing…";
+  color:#bba9b1;
+}
+.pageNo{text-align:center;color:#b49ca5;font-size:14px;padding-top:4px}
+
+/* CONTROLS */
+.bottom{
+  flex:none;
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;padding:5px 12px 11px;
+}
+.round{
+  width:48px;height:48px;border-radius:50%;
+  background:#fff;color:var(--deep);
+  font-size:28px;
+  box-shadow:0 5px 16px #5a324620;
+}
+.round.add{background:#df5b51;color:white}
+.tools{
+  display:flex;gap:3px;
+  padding:4px 6px;
+  background:#ffffffdc;
+  border-radius:21px;
+  box-shadow:0 5px 18px #5a324614;
+}
+.tools button{
+  width:42px;height:40px;
+  background:transparent;border-radius:13px;
+  font-size:20px;
+}
+.tools button:hover{background:#f5dce7}
+.tools.disabled{opacity:.35;pointer-events:none}
+#count{display:none}
+
+/* PANELS */
+.overlay{
+  position:fixed;inset:0;z-index:20;
+  display:none;align-items:flex-end;
+  background:#2c1d2788;
+}
+.overlay.open{display:flex}
+.sheet{
+  width:min(620px,100%);
+  max-height:90vh;overflow:auto;
+  margin:auto;
+  padding:20px;
+  background:#fffafd;
+  border-radius:27px 27px 0 0;
+}
+@media(min-width:700px){
+  .overlay{align-items:center}
+  .sheet{border-radius:27px;max-height:82vh}
+}
+.sheet h2{
+  margin:0 0 15px;
+  color:var(--deep);
+  font-size:28px;font-weight:400;
+}
+.row{
+  width:100%;display:flex;align-items:center;gap:12px;
+  background:#fff;
+  padding:13px 14px;
+  margin:7px 0;
+  border-radius:15px;
+  box-shadow:0 3px 10px #5a324610;
+  text-align:left;
+}
+.sheet input[type=text]{
+  width:100%;padding:11px 13px;
+  border:2px solid var(--line);
+  border-radius:14px;background:white;
+  outline:none;
+}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin:9px 0 14px}
+.swatches button{
+  width:42px;height:42px;border-radius:50%;
+  border:3px solid white;
+  box-shadow:0 0 0 2px var(--line);
+}
+.swatches button.selected{box-shadow:0 0 0 3px var(--deep)}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+.primary{background:#df5b51;color:white;padding:10px 16px;border-radius:14px}
+.danger{color:#df5b51}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.card{
+  text-align:left;
+  background:var(--paper);
+  border:2px solid var(--line);
+  border-radius:14px;
+  padding:11px;
+  min-height:90px;
+}
+.card small{display:block;color:var(--muted);font-size:13px}
+
+/* LIBRARY */
+.library{
+  position:fixed;inset:0;z-index:15;
+  display:none;overflow:auto;
+  padding:25px 20px 45px;
+  background:linear-gradient(135deg,#f8e9ee,#eaf3f5 55%,#fff3df);
+}
+.library.open{display:block}
+.library-head{
+  width:min(980px,100%);margin:0 auto 25px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.library-head h2{margin:0;color:var(--deep);font-size:34px;font-weight:400}
+.shelf{
+  width:min(980px,100%);margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+  gap:28px 20px;
+}
+.book{
+  background:transparent;
+  box-shadow:none;
+  text-align:center;
+}
+.book-cover{
+  aspect-ratio:3/4;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:9px;
+  border-radius:6px 16px 16px 6px;
+  color:white;
+  box-shadow:inset 11px 0 #0000001e,0 11px 24px #46293a35;
+  transition:.18s;
+}
+.book:hover .book-cover{transform:translateY(-4px)}
+.book-cover span{font-size:50px}
+.book-cover b{
+  max-width:88%;
+  background:#ffffffe6;color:var(--deep);
+  padding:4px 9px;border-radius:9px;
+  font-size:17px;font-weight:400;
+  overflow-wrap:anywhere;
+}
+.book small{display:block;color:var(--muted);margin-top:9px;font-size:15px}
+.book.current .book-cover{outline:3px solid var(--deep);outline-offset:4px}
+.new-book .book-cover{
+  color:var(--deep);
+  border:3px dashed var(--rose);
+  background:#ffffff80;
+  box-shadow:none;
+}
+
+.toast{
+  position:fixed;left:50%;bottom:85px;
+  transform:translateX(-50%);
+  z-index:40;display:none;
+  background:var(--deep);color:white;
+  padding:9px 17px;border-radius:20px;
+}
+@media(max-width:600px){
+  .top{margin-top:7px;width:calc(100% - 14px)}
+  .top h1{font-size:22px}
+  main{padding:9px 7px 2px}
+  .stage{width:96vw;min-height:calc(100dvh - 140px);height:calc(100dvh - 140px)}
+  .page{padding:21px 22px 10px 48px}
+  .page:before{left:27px}
+  .day{font-size:43px}
+  .writing{font-size:var(--fs)}
+  .tools button{width:37px}
+}
+@media(prefers-reduced-motion:reduce){.page{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="top">
+  <button class="icon" data-action="library" aria-label="Books">📚</button>
+  <h1 id="bookTitle">Baby Tomato Diary</h1>
+  <button class="icon" id="favorite" data-action="favorite" aria-label="Favorite page">☆</button>
+  <button class="icon" data-action="menu" aria-label="Menu">⋮</button>
+</header>
+
+<main>
+  <div class="stage" id="stage"></div>
+</main>
+
+<footer class="bottom">
+  <button class="round" id="prev" data-action="prev">‹</button>
+  <div class="tools disabled" id="tools">
+    <button data-format="undo">↶</button>
+    <button data-format="redo">↷</button>
+    <button data-format="bold"><b>B</b></button>
+    <button data-format="italic"><i>I</i></button>
+    <button data-format="underline"><u>U</u></button>
+  </div>
+  <button class="round" id="next" data-action="next">›</button>
+  <span id="count"></span>
+</footer>
+</div>
+
+<div class="library" id="library"></div>
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+<input id="backupFile" type="file" accept="application/json" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+const STORE='baby-tomato-storypad-diary-v1';
+const FONT_SIZE='baby-tomato-font-size';
+const COLORS=['#d98da2','#e2574c','#e2aa76','#d5b77a','#86bfa5','#8fb8d8','#9b91c9','#c79ad9'];
+const EMOJIS=['🍅','🌷','🌸','🐣','🦋','🌙','⭐','📖','🍓','🐰'];
+const $=s=>document.querySelector(s);
+const id=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>new Date().toISOString().slice(0,10);
+
+let books=[];
+let bookIndex=0;
+let pageIndex=0;
+let animating=false;
+let timer=null;
+let fontSize=Number(localStorage.getItem(FONT_SIZE))||23;
+
+function newPage(title='',content=''){
+  return {id:id(),title,content,html:'',date:today(),favorite:false};
+}
+function newBook(title='My First Book',color=COLORS[0],emoji='🍅'){
+  return {id:id(),title,color,emoji,pages:[
+    newPage('Welcome, little book ♡','This is your little notebook. Write directly on the page, then tap › to turn the page.'),
+    newPage('A little note','Your words belong here.')
+  ],at:1};
+}
+function currentBook(){return books[bookIndex]}
+function currentPage(){return currentBook().pages[pageIndex-1]}
+
+function save(){
+  try{localStorage.setItem(STORE,JSON.stringify(books))}
+  catch(e){toast('Storage is full — use Back up.')}
+}
+function load(){
+  try{books=JSON.parse(localStorage.getItem(STORE))||[]}
+  catch(e){books=[]}
+  if(!Array.isArray(books)||!books.length)books=[newBook()];
+  books.forEach(b=>{
+    b.color=b.color||COLORS[0];
+    b.emoji=b.emoji||'🍅';
+    b.pages=Array.isArray(b.pages)&&b.pages.length?b.pages:[newPage()];
+    b.pages.forEach(p=>{
+      p.date=p.date||today();
+      p.title=p.title||'';
+      p.content=p.content||'';
+      p.html=p.html||'';
+      p.favorite=!!p.favorite;
+    });
+  });
+}
+function applyFontSize(){
+  document.documentElement.style.setProperty('--fs',fontSize+'px');
+  document.documentElement.style.setProperty('--lh',Math.round(fontSize*1.7)+'px');
+  localStorage.setItem(FONT_SIZE,fontSize);
+}
+function laterSave(){
+  clearTimeout(timer);
+  timer=setTimeout(save,450);
+}
+function toast(message){
+  const t=$('#toast');
+  t.textContent=message;t.style.display='block';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.display='none',2200);
+}
+function escapeHTML(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+function safeHTML(html){
+  const d=new DOMParser().parseFromString('<body>'+html+'</body>','text/html').body;
+  const allowed=new Set(['B','I','U','S','STRONG','EM','DIV','P','BR','SPAN']);
+  (function walk(node){
+    [...node.childNodes].forEach(child=>{
+      if(child.nodeType===3)return;
+      if(child.nodeType!==1){child.remove();return}
+      if(!allowed.has(child.tagName)){
+        child.replaceWith(document.createTextNode(child.textContent));return;
+      }
+      [...child.attributes].forEach(a=>child.removeAttribute(a.name));
+      walk(child);
+    });
+  })(d);
+  return d.innerHTML;
+}
+
+function dateLabel(value){
+  const [y,m,d]=value.split('-').map(Number);
+  const dt=new Date(y,m-1,d);
+  const suffix=(d%100>=11&&d%100<=13)?'th':(['th','st','nd','rd'][d%10]||'th');
+  return {day:String(d).padStart(2,'0'),suffix,month:dt.toLocaleDateString('en',{month:'long'}),year:y};
+}
+
+function makePageElement(i){
+  const b=currentBook();
+  const el=document.createElement('section');
+  el.className='page';
+
+  if(i===0){
+    el.classList.add('cover');
+    el.style.setProperty('--cover',b.color);
+    el.innerHTML=`
+      <div class="emoji">${escapeHTML(b.emoji)}</div>
+      <h2>${escapeHTML(b.title)}</h2>
+      <p>${b.pages.length} page${b.pages.length===1?'':'s'}</p>
+      <p>Tap to open ›</p>`;
+    return el;
+  }
+
+  const p=b.pages[i-1];
+  const d=dateLabel(p.date);
+
+  el.innerHTML=`
+    <label class="date">
+      <span class="day">${d.day}</span>
+      <span class="dateWords"><small>${d.suffix}</small><span>${d.month} ${d.year}</span></span>
+      <input class="dateInput" type="date" value="${escapeHTML(p.date)}">
+    </label>
+    <input class="title" value="${escapeHTML(p.title)}" placeholder="Title…" aria-label="Page title">
+    <div class="writing" contenteditable="true" spellcheck="true" aria-label="Diary writing">${safeHTML(p.html || escapeHTML(p.content).replace(/\n/g,'<br>'))}</div>
+    <div class="pageNo">${i}</div>`;
+
+  const title=el.querySelector('.title');
+  const writing=el.querySelector('.writing');
+  const date=el.querySelector('.dateInput');
+
+  title.addEventListener('input',()=>{
+    p.title=title.value;
+    laterSave();
+  });
+  writing.addEventListener('input',()=>{
+    p.html=safeHTML(writing.innerHTML);
+    p.content=writing.innerText;
+    laterSave();
+  });
+  date.addEventListener('change',()=>{
+    p.date=date.value||today();
+    mount(pageIndex);
+  });
+  writing.addEventListener('focus',()=>$('#tools').classList.remove('disabled'));
+  return el;
+}
+
+function updateUI(){
+  const b=currentBook();
+  $('#bookTitle').textContent=b.title;
+  $('#count').textContent=pageIndex===0?'Cover':`Page ${pageIndex} of ${b.pages.length}`;
+  $('#favorite').textContent=pageIndex>0&&currentPage().favorite?'★':'☆';
+  $('#favorite').style.color=pageIndex>0&&currentPage().favorite?'#e5a31a':'';
+  $('#prev').disabled=pageIndex<=0;
+  const next=$('#next');
+  next.textContent=pageIndex===b.pages.length?'＋':'›';
+  next.classList.toggle('add',pageIndex===b.pages.length);
+  $('#tools').classList.toggle('disabled',pageIndex===0);
+}
+
+function mount(i){
+  const b=currentBook();
+  pageIndex=Math.max(0,Math.min(i,b.pages.length));
+  const stage=$('#stage');
+  stage.innerHTML='';
+  stage.appendChild(makePageElement(pageIndex));
+  updateUI();
+  b.at=pageIndex;
+  save();
+}
+
+function flip(direction){
+  if(animating)return;
+  const b=currentBook();
+
+  if(direction>0 && pageIndex===b.pages.length){
+    b.pages.push(newPage());
+  }
+
+  const target=pageIndex+direction;
+  if(target<0 || target>b.pages.length)return;
+
+  animating=true;
+  const stage=$('#stage');
+  const old=stage.firstElementChild;
+  const next=makePageElement(target);
+
+  if(direction>0){
+    next.style.zIndex=1;
+    old.style.zIndex=2;
+    stage.appendChild(next);
+    requestAnimationFrame(()=>old.classList.add('turn-out'));
+  }else{
+    next.style.zIndex=3;
+    next.classList.add('turn-in');
+    stage.appendChild(next);
+    requestAnimationFrame(()=>next.classList.remove('turn-in'));
+  }
+
+  pageIndex=target;
+  updateUI();
+
+  setTimeout(()=>{
+    if(old&&old.parentNode)old.remove();
+    next.style.zIndex='';
+    animating=false;
+    b.at=pageIndex;
+    save();
+  },window.matchMedia('(prefers-reduced-motion:reduce)').matches?20:740);
+}
+
+/* SHEETS */
+function openSheet(html){
+  $('#sheet').innerHTML=html;
+  $('#overlay').classList.add('open');
+}
+function closeSheet(){$('#overlay').classList.remove('open')}
+
+function coverEditor(isNew){
+  const b=isNew?{title:'',color:COLORS[0],emoji:'🍅'}:currentBook();
+  openSheet(`
+    <h2>${isNew?'New book':'Edit cover'}</h2>
+    <input id="bookName" type="text" value="${escapeHTML(b.title)}" placeholder="Book title">
+    <p>Cover colour</p>
+    <div class="swatches">
+      ${COLORS.map(c=>`<button data-color="${c}" class="${c===b.color?'selected':''}" style="background:${c}"></button>`).join('')}
+    </div>
+    <p>Little sticker</p>
+    <div class="swatches">
+      ${EMOJIS.map(e=>`<button data-emoji="${e}" class="${e===b.emoji?'selected':''}">${e}</button>`).join('')}
+    </div>
+    <div class="actions">
+      <button data-action="closeSheet">Cancel</button>
+      <button class="primary" data-action="${isNew?'createBook':'saveCover'}">${isNew?'Create':'Save'}</button>
+    </div>`);
+  $('#sheet').dataset.newBook=isNew?'1':'0';
+  $('#sheet').dataset.color=b.color;
+  $('#sheet').dataset.emoji=b.emoji;
+}
+
+function pagesSheet(){
+  const b=currentBook();
+  openSheet(`
+    <h2>Pages</h2>
+    <div class="grid">
+      ${b.pages.map((p,i)=>`
+        <button class="card" data-action="jump" data-page="${i+1}">
+          <small>${escapeHTML(p.date)} ${p.favorite?'★':''}</small>
+          ${escapeHTML(p.title||'Untitled')}
+          <small>${escapeHTML((p.content||'').slice(0,55))}</small>
+        </button>`).join('')}
+    </div>`);
+}
+
+function menuSheet(){
+  openSheet(`
+    <h2>Options</h2>
+    <button class="row" data-action="pages">📄 All pages</button>
+    <button class="row" data-action="editCover">🎨 Edit cover</button>
+    <button class="row" data-action="fontDown">A− &nbsp; Smaller writing</button>
+    <button class="row" data-action="fontUp">A＋ &nbsp; Larger writing</button>
+    <button class="row" data-action="backup">⬇ Back up diary</button>
+    <button class="row" data-action="restore">⬆ Restore diary</button>
+    <button class="row danger" data-action="deletePage">🗑 Delete this page</button>
+    <button class="row danger" data-action="deleteBook">🗑 Delete this book</button>`);
+}
+
+function libraryView(){
+  $('#library').innerHTML=`
+    <div class="library-head">
+      <h2>📚 My Books</h2>
+      <button class="row" style="width:auto" data-action="closeLibrary">✕ Close</button>
+    </div>
+    <div class="shelf">
+      ${books.map((b,i)=>`
+        <button class="book ${i===bookIndex?'current':''}" data-action="openBook" data-book="${i}">
+          <div class="book-cover" style="background:linear-gradient(145deg,${b.color},#f6c6d2)">
+            <span>${escapeHTML(b.emoji)}</span>
+            <b>${escapeHTML(b.title)}</b>
+          </div>
+          <small>${b.pages.length} page${b.pages.length===1?'':'s'}</small>
+        </button>`).join('')}
+      <button class="book new-book" data-action="newBook">
+        <div class="book-cover"><span>＋</span><b>New book</b></div>
+        <small>Start fresh</small>
+      </button>
+    </div>`;
+  $('#library').classList.add('open');
+}
+function closeLibrary(){$('#library').classList.remove('open')}
+
+/* ACTIONS */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-action],[data-format],[data-color],[data-emoji]');
+  if(!el)return;
+
+  if(el.dataset.color){
+    document.querySelectorAll('[data-color]').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    $('#sheet').dataset.color=el.dataset.color;
+    return;
+  }
+  if(el.dataset.emoji){
+    document.querySelectorAll('[data-emoji]').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    $('#sheet').dataset.emoji=el.dataset.emoji;
+    return;
+  }
+
+  const action=el.dataset.action;
+
+  if(action==='prev')flip(-1);
+  else if(action==='next')flip(1);
+  else if(action==='favorite'){
+    if(pageIndex>0){
+      currentPage().favorite=!currentPage().favorite;
+      updateUI();save();
+    }
+  }
+  else if(action==='library')libraryView();
+  else if(action==='closeLibrary')closeLibrary();
+  else if(action==='menu')menuSheet();
+  else if(action==='closeSheet')closeSheet();
+  else if(action==='pages')pagesSheet();
+  else if(action==='editCover')coverEditor(false);
+  else if(action==='newBook')coverEditor(true);
+  else if(action==='openBook'){
+    bookIndex=Number(el.dataset.book);
+    closeLibrary();
+    mount(Math.min(currentBook().at||0,currentBook().pages.length));
+  }
+  else if(action==='jump'){
+    closeSheet();
+    mount(Number(el.dataset.page));
+  }
+  else if(action==='createBook'){
+    const title=$('#bookName').value.trim()||'My book';
+    books.push({
+      id:id(),title,
+      color:$('#sheet').dataset.color||COLORS[0],
+      emoji:$('#sheet').dataset.emoji||'🍅',
+      pages:[newPage()],
+      at:0
+    });
+    bookIndex=books.length-1;
+    closeSheet();save();mount(0);
+  }
+  else if(action==='saveCover'){
+    const b=currentBook();
+    b.title=$('#bookName').value.trim()||'My book';
+    b.color=$('#sheet').dataset.color||b.color;
+    b.emoji=$('#sheet').dataset.emoji||b.emoji;
+    closeSheet();save();mount(pageIndex);
+  }
+  else if(action==='fontDown'){
+    fontSize=Math.max(16,fontSize-2);applyFontSize();
+  }
+  else if(action==='fontUp'){
+    fontSize=Math.min(34,fontSize+2);applyFontSize();
+  }
+  else if(action==='deletePage'){
+    if(pageIndex===0)return toast('Open a page first.');
+    if(currentBook().pages.length<2)return toast('A book needs at least one page.');
+    if(confirm('Delete this page?')){
+      currentBook().pages.splice(pageIndex-1,1);
+      closeSheet();mount(Math.min(pageIndex,currentBook().pages.length));
+    }
+  }
+  else if(action==='deleteBook'){
+    if(books.length<2)return toast('Keep at least one book.');
+    if(confirm(`Delete "${currentBook().title}" and all its pages?`)){
+      books.splice(bookIndex,1);bookIndex=0;closeSheet();save();mount(0);
+    }
+  }
+  else if(action==='backup'){
+    const blob=new Blob([JSON.stringify(books)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='baby-tomato-diary-backup.json';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    closeSheet();toast('Backup created ♡');
+  }
+  else if(action==='restore'){
+    $('#backupFile').click();
+  }
+});
+
+document.addEventListener('click',e=>{
+  const f=e.target.closest('[data-format]');
+  if(!f)return;
+  const cmd=f.dataset.format;
+  const area=$('.writing');
+  if(!area)return;
+  area.focus();
+  document.execCommand(cmd,false,null);
+});
+
+$('#backupFile').addEventListener('change',async()=>{
+  const file=$('#backupFile').files[0];
+  $('#backupFile').value='';
+  if(!file)return;
+  try{
+    const data=JSON.parse(await file.text());
+    if(!Array.isArray(data)||!data.length)throw new Error();
+    if(!confirm('Replace this diary with the backup?'))return;
+    books=data;bookIndex=0;save();mount(0);toast('Diary restored ♡');
+  }catch(e){toast('That backup could not be opened.')}
+});
+
+$('#stage').addEventListener('click',e=>{
+  if(e.target.closest('.cover'))flip(1);
+});
+
+$('#overlay').addEventListener('click',e=>{
+  if(e.target===$('#overlay'))closeSheet();
+});
+
+load();
+applyFontSize();
+mount(Math.min(currentBook().at||0,currentBook().pages.length));
+</script>
+</body>
+</html>
